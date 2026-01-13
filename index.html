@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bible Research Library</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #e8e8e8;
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom: 1px solid #3a3a5a;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: #d4af37;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            color: #a0a0b0;
+            font-style: italic;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-num {
+            font-size: 2rem;
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #6a6a7a;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Buttons */
+        button {
+            padding: 12px 24px;
+            background: #d4af37;
+            color: #1a1a2e;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: #e8c34a;
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #3a3a5a;
+            color: #e8e8e8;
+        }
+
+        .btn-secondary:hover {
+            background: #4a4a6a;
+        }
+
+        .btn-danger {
+            background: #8b3a3a;
+            color: #e8e8e8;
+        }
+
+        .btn-danger:hover {
+            background: #a04545;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 0.85rem;
+        }
+
+        /* Action Bar */
+        .action-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 14px 20px;
+            padding-left: 45px;
+            border: 1px solid #3a3a5a;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: #e8e8e8;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+
+        .search-box::before {
+            content: '⌕';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6a6a7a;
+            font-size: 1.2rem;
+        }
+
+        .filter-select {
+            padding: 14px 20px;
+            border: 1px solid #3a3a5a;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: #e8e8e8;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: #1a1a2e;
+            border-radius: 12px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid #3a3a5a;
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #3a3a5a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            color: #d4af37;
+            font-size: 1.3rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #6a6a7a;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .modal-close:hover {
+            color: #e8e8e8;
+            background: none;
+            transform: none;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #a0a0b0;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #3a3a5a;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: #e8e8e8;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 250px;
+            resize: vertical;
+            line-height: 1.7;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-hint {
+            font-size: 0.8rem;
+            color: #6a6a7a;
+            margin-top: 5px;
+        }
+
+        /* Entry Cards */
+        .entries-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .entry-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            border: 1px solid #3a3a5a;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .entry-card:hover {
+            border-color: #d4af37;
+            box-shadow: 0 4px 20px rgba(212, 175, 55, 0.1);
+        }
+
+        .entry-card-header {
+            padding: 20px 25px;
+            background: rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 15px;
+            cursor: pointer;
+        }
+
+        .entry-title {
+            font-size: 1.4rem;
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .entry-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 8px;
+        }
+
+        .entry-type {
+            font-size: 0.7rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .entry-type.person { background: #2d5a4a; color: #7dd3b8; }
+        .entry-type.event { background: #5a4a2d; color: #d3c07d; }
+        .entry-type.place { background: #2d4a5a; color: #7db8d3; }
+        .entry-type.concept { background: #4a2d5a; color: #b87dd3; }
+
+        .entry-date {
+            font-size: 0.8rem;
+            color: #6a6a7a;
+        }
+
+        .entry-card-body {
+            padding: 0 25px 25px;
+            display: none;
+        }
+
+        .entry-card.expanded .entry-card-body {
+            display: block;
+        }
+
+        .entry-content {
+            color: #c0c0d0;
+            white-space: pre-wrap;
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .entry-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #3a3a5a;
+        }
+
+        .tag {
+            background: #2a2a4a;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: #8888aa;
+        }
+
+        .entry-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #3a3a5a;
+        }
+
+        .expand-icon {
+            color: #6a6a7a;
+            transition: transform 0.3s ease;
+        }
+
+        .entry-card.expanded .expand-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6a6a7a;
+        }
+
+        .empty-state h3 {
+            color: #a0a0b0;
+            margin-bottom: 10px;
+            font-size: 1.3rem;
+        }
+
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+
+        /* Export Section */
+        .export-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #3a3a5a;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: #2d5a4a;
+            color: #7dd3b8;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 2000;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notification.error {
+            background: #5a2d2d;
+            color: #d37d7d;
+        }
+
+        /* View Entry Modal */
+        .view-content {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 25px;
+            white-space: pre-wrap;
+            line-height: 1.8;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #3a3a5a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #4a4a6a; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .form-row { grid-template-columns: 1fr; }
+            .action-bar { flex-direction: column; }
+            header h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bible Research Library</h1>
+            <p>Your personal encyclopedia of biblical people, events, places, and concepts</p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-num" id="stat-total">0</div>
+                    <div class="stat-label">Entries</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="stat-people">0</div>
+                    <div class="stat-label">People</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="stat-events">0</div>
+                    <div class="stat-label">Events</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num" id="stat-places">0</div>
+                    <div class="stat-label">Places</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="action-bar">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Search your library..." oninput="renderEntries()">
+            </div>
+            <select class="filter-select" id="filter-type" onchange="renderEntries()">
+                <option value="all">All Types</option>
+                <option value="person">People</option>
+                <option value="event">Events</option>
+                <option value="place">Places</option>
+                <option value="concept">Concepts</option>
+            </select>
+            <button onclick="openAddModal()">+ Add Entry</button>
+        </div>
+
+        <div class="entries-grid" id="entries-list">
+            <!-- Entries render here -->
+        </div>
+
+        <div class="export-section">
+            <div>
+                <span style="color: #6a6a7a;">Export your research to share or backup:</span>
+            </div>
+            <div class="export-buttons">
+                <button onclick="exportJSON()" class="btn-secondary btn-small">Export JSON</button>
+                <button onclick="exportMarkdown()" class="btn-secondary btn-small">Export Markdown</button>
+                <button onclick="document.getElementById('import-file').click()" class="btn-secondary btn-small">Import JSON</button>
+                <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div class="modal-overlay" id="add-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Entry</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="saveEntry(event)">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="entry-name">Name / Title *</label>
+                            <input type="text" id="entry-name" placeholder="e.g., John the Baptist" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="entry-type">Type *</label>
+                            <select id="entry-type" required>
+                                <option value="person">Person</option>
+                                <option value="event">Event</option>
+                                <option value="place">Place</option>
+                                <option value="concept">Concept / Theme</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="entry-content">Content *</label>
+                        <textarea id="entry-content" placeholder="Paste the AI-generated biography, description, or your research notes here..." required></textarea>
+                        <div class="form-hint">Paste content from ChatGPT, Claude, or write your own research</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="entry-tags">Tags (comma-separated)</label>
+                        <input type="text" id="entry-tags" placeholder="e.g., prophet, new testament, baptism">
+                        <div class="form-hint">Tags help organize and find entries later</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="entry-refs">Scripture References</label>
+                        <input type="text" id="entry-refs" placeholder="e.g., Matthew 3, Luke 1:5-25, John 1:19-34">
+                    </div>
+
+                    <button type="submit" style="width: 100%; margin-top: 10px;">Save Entry</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // Data
+        let entries = JSON.parse(localStorage.getItem('bibleLibrary') || '[]');
+        let editingId = null;
+
+        // Render entries
+        function renderEntries() {
+            const container = document.getElementById('entries-list');
+            const search = document.getElementById('search-input').value.toLowerCase();
+            const filterType = document.getElementById('filter-type').value;
+
+            // Filter entries
+            let filtered = entries.filter(e => {
+                const matchesType = filterType === 'all' || e.type === filterType;
+                const matchesSearch = !search ||
+                    e.name.toLowerCase().includes(search) ||
+                    e.content.toLowerCase().includes(search) ||
+                    e.tags.some(t => t.toLowerCase().includes(search)) ||
+                    (e.references && e.references.toLowerCase().includes(search));
+                return matchesType && matchesSearch;
+            });
+
+            // Update stats
+            document.getElementById('stat-total').textContent = entries.length;
+            document.getElementById('stat-people').textContent = entries.filter(e => e.type === 'person').length;
+            document.getElementById('stat-events').textContent = entries.filter(e => e.type === 'event').length;
+            document.getElementById('stat-places').textContent = entries.filter(e => e.type === 'place').length;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>${entries.length === 0 ? 'Your library is empty' : 'No matching entries'}</h3>
+                        <p>${entries.length === 0 ? 'Add your first entry to start building your Bible research library.' : 'Try a different search term or filter.'}</p>
+                        ${entries.length === 0 ? '<button onclick="openAddModal()">+ Add First Entry</button>' : ''}
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(entry => `
+                <div class="entry-card" id="card-${entry.id}">
+                    <div class="entry-card-header" onclick="toggleCard(${entry.id})">
+                        <div>
+                            <div class="entry-title">${escapeHtml(entry.name)}</div>
+                            <div class="entry-meta">
+                                <span class="entry-type ${entry.type}">${entry.type}</span>
+                                ${entry.references ? `<span class="entry-date">${escapeHtml(entry.references)}</span>` : ''}
+                            </div>
+                        </div>
+                        <span class="expand-icon">▼</span>
+                    </div>
+                    <div class="entry-card-body">
+                        <div class="entry-content">${escapeHtml(entry.content)}</div>
+                        ${entry.tags.length ? `
+                            <div class="entry-tags">
+                                ${entry.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                        <div class="entry-actions">
+                            <button onclick="editEntry(${entry.id})" class="btn-secondary btn-small">Edit</button>
+                            <button onclick="deleteEntry(${entry.id})" class="btn-danger btn-small">Delete</button>
+                            <button onclick="copyEntry(${entry.id})" class="btn-secondary btn-small">Copy Text</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Toggle card expansion
+        function toggleCard(id) {
+            const card = document.getElementById(`card-${id}`);
+            card.classList.toggle('expanded');
+        }
+
+        // Open add modal
+        function openAddModal() {
+            editingId = null;
+            document.getElementById('modal-title').textContent = 'Add New Entry';
+            document.getElementById('entry-name').value = '';
+            document.getElementById('entry-type').value = 'person';
+            document.getElementById('entry-content').value = '';
+            document.getElementById('entry-tags').value = '';
+            document.getElementById('entry-refs').value = '';
+            document.getElementById('add-modal').classList.add('show');
+            document.getElementById('entry-name').focus();
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('add-modal').classList.remove('show');
+            editingId = null;
+        }
+
+        // Save entry
+        function saveEntry(e) {
+            e.preventDefault();
+
+            const entry = {
+                id: editingId || Date.now(),
+                name: document.getElementById('entry-name').value.trim(),
+                type: document.getElementById('entry-type').value,
+                content: document.getElementById('entry-content').value.trim(),
+                tags: document.getElementById('entry-tags').value.split(',').map(t => t.trim()).filter(t => t),
+                references: document.getElementById('entry-refs').value.trim(),
+                created: editingId ? entries.find(e => e.id === editingId)?.created : new Date().toISOString(),
+                updated: new Date().toISOString()
+            };
+
+            if (editingId) {
+                const idx = entries.findIndex(e => e.id === editingId);
+                entries[idx] = entry;
+                showNotification('Entry updated!');
+            } else {
+                entries.unshift(entry);
+                showNotification('Entry saved!');
+            }
+
+            localStorage.setItem('bibleLibrary', JSON.stringify(entries));
+            closeModal();
+            renderEntries();
+        }
+
+        // Edit entry
+        function editEntry(id) {
+            const entry = entries.find(e => e.id === id);
+            if (!entry) return;
+
+            editingId = id;
+            document.getElementById('modal-title').textContent = 'Edit Entry';
+            document.getElementById('entry-name').value = entry.name;
+            document.getElementById('entry-type').value = entry.type;
+            document.getElementById('entry-content').value = entry.content;
+            document.getElementById('entry-tags').value = entry.tags.join(', ');
+            document.getElementById('entry-refs').value = entry.references || '';
+            document.getElementById('add-modal').classList.add('show');
+        }
+
+        // Delete entry
+        function deleteEntry(id) {
+            if (!confirm('Delete this entry? This cannot be undone.')) return;
+            entries = entries.filter(e => e.id !== id);
+            localStorage.setItem('bibleLibrary', JSON.stringify(entries));
+            renderEntries();
+            showNotification('Entry deleted');
+        }
+
+        // Copy entry text
+        function copyEntry(id) {
+            const entry = entries.find(e => e.id === id);
+            if (!entry) return;
+            navigator.clipboard.writeText(entry.content);
+            showNotification('Copied to clipboard!');
+        }
+
+        // Export JSON
+        function exportJSON() {
+            if (entries.length === 0) {
+                showNotification('No entries to export', true);
+                return;
+            }
+            downloadFile(
+                JSON.stringify(entries, null, 2),
+                `bible-library-${new Date().toISOString().split('T')[0]}.json`,
+                'application/json'
+            );
+            showNotification('Exported as JSON');
+        }
+
+        // Export Markdown
+        function exportMarkdown() {
+            if (entries.length === 0) {
+                showNotification('No entries to export', true);
+                return;
+            }
+
+            // Group by type
+            const grouped = {
+                person: entries.filter(e => e.type === 'person'),
+                event: entries.filter(e => e.type === 'event'),
+                place: entries.filter(e => e.type === 'place'),
+                concept: entries.filter(e => e.type === 'concept')
+            };
+
+            let md = `# Bible Research Library\n\n`;
+            md += `*Exported: ${new Date().toLocaleDateString()}*\n\n`;
+            md += `**Total Entries:** ${entries.length}\n\n---\n\n`;
+
+            const typeLabels = { person: 'People', event: 'Events', place: 'Places', concept: 'Concepts' };
+
+            for (const [type, items] of Object.entries(grouped)) {
+                if (items.length === 0) continue;
+                md += `## ${typeLabels[type]}\n\n`;
+                for (const entry of items) {
+                    md += `### ${entry.name}\n\n`;
+                    if (entry.references) md += `**Scripture:** ${entry.references}\n\n`;
+                    if (entry.tags.length) md += `**Tags:** ${entry.tags.join(', ')}\n\n`;
+                    md += `${entry.content}\n\n---\n\n`;
+                }
+            }
+
+            downloadFile(md, `bible-library-${new Date().toISOString().split('T')[0]}.md`, 'text/markdown');
+            showNotification('Exported as Markdown');
+        }
+
+        // Import JSON
+        function importJSON(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const imported = JSON.parse(event.target.result);
+                    if (!Array.isArray(imported)) throw new Error('Invalid format');
+
+                    // Merge with existing, avoiding duplicates by ID
+                    const existingIds = new Set(entries.map(e => e.id));
+                    const newEntries = imported.filter(e => !existingIds.has(e.id));
+                    entries = [...newEntries, ...entries];
+
+                    localStorage.setItem('bibleLibrary', JSON.stringify(entries));
+                    renderEntries();
+                    showNotification(`Imported ${newEntries.length} new entries!`);
+                } catch (err) {
+                    showNotification('Invalid JSON file', true);
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        }
+
+        // Download helper
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Notification
+        function showNotification(message, isError = false) {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.className = 'notification show' + (isError ? ' error' : '');
+            setTimeout(() => notif.classList.remove('show'), 3000);
+        }
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        // Close modal on overlay click
+        document.getElementById('add-modal').addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) closeModal();
+        });
+
+        // Initial render
+        renderEntries();
+    </script>
+</body>
+</html>
