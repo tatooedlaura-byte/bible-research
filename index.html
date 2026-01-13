@@ -624,6 +624,8 @@
                     <option value="concept">Concepts</option>
                 </select>
                 <button onclick="openAddModal()">+ Add Entry</button>
+                <button onclick="saveToCloud()" class="btn-secondary">Save</button>
+                <button onclick="exportJSON()" class="btn-secondary">Export JSON</button>
             </div>
 
             <div class="entries-grid" id="entries-list">
@@ -947,6 +949,18 @@
             if (!entry) return;
             navigator.clipboard.writeText(entry.content);
             showNotification('Copied to clipboard!');
+        }
+
+        // Save/sync to cloud
+        async function saveToCloud() {
+            showSyncing(true);
+            try {
+                await loadEntries();
+                showNotification('Synced with cloud!');
+            } catch (error) {
+                showNotification('Sync failed. Try again.', true);
+            }
+            showSyncing(false);
         }
 
         // Export JSON
