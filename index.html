@@ -566,6 +566,31 @@
 
         /* Hidden */
         .hidden { display: none !important; }
+
+        /* Top Toolbar */
+        .top-toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(26, 26, 46, 0.95);
+            border-bottom: 1px solid #3a3a5a;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            z-index: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .top-toolbar button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .main-app-content {
+            padding-top: 60px;
+        }
     </style>
 </head>
 <body>
@@ -588,7 +613,12 @@
 
     <!-- Main App -->
     <div id="main-app" class="hidden">
-        <div class="container">
+        <div class="top-toolbar">
+            <button onclick="saveToCloud()" class="btn-secondary">Save</button>
+            <button onclick="exportJSON()" class="btn-secondary">Export JSON</button>
+            <button onclick="logout()" class="btn-secondary">Logout</button>
+        </div>
+        <div class="container main-app-content">
             <header>
                 <h1>Bible Research Library</h1>
                 <p>Your personal encyclopedia of biblical people, events, places, and concepts</p>
@@ -624,23 +654,10 @@
                     <option value="concept">Concepts</option>
                 </select>
                 <button onclick="openAddModal()">+ Add Entry</button>
-                <button onclick="saveToCloud()" class="btn-secondary">Save</button>
-                <button onclick="exportJSON()" class="btn-secondary">Export JSON</button>
             </div>
 
             <div class="entries-grid" id="entries-list">
                 <!-- Entries render here -->
-            </div>
-
-            <div class="export-section">
-                <div>
-                    <span style="color: #6a6a7a;">Export your research to share or backup:</span>
-                </div>
-                <div class="export-buttons">
-                    <button onclick="exportJSON()" class="btn-secondary btn-small">Export JSON</button>
-                    <button onclick="exportMarkdown()" class="btn-secondary btn-small">Export Markdown</button>
-                    <button onclick="logout()" class="btn-secondary btn-small">Logout</button>
-                </div>
             </div>
         </div>
     </div>
