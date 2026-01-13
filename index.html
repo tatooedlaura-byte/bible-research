@@ -69,6 +69,63 @@
             letter-spacing: 1px;
         }
 
+        /* Login Screen */
+        .login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #3a3a5a;
+            border-radius: 16px;
+            padding: 50px 40px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .login-box h1 {
+            color: #d4af37;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+
+        .login-box p {
+            color: #a0a0b0;
+            margin-bottom: 30px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 1px solid #3a3a5a;
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: #e8e8e8;
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: #d4af37;
+        }
+
+        .login-box input::placeholder {
+            color: #6a6a7a;
+        }
+
+        .login-error {
+            color: #d37d7d;
+            margin-bottom: 15px;
+            display: none;
+        }
+
         /* Buttons */
         button {
             padding: 12px 24px;
@@ -453,15 +510,45 @@
             color: #d37d7d;
         }
 
-        /* View Entry Modal */
-        .view-content {
-            background: rgba(0,0,0,0.2);
-            border-radius: 8px;
-            padding: 25px;
-            white-space: pre-wrap;
-            line-height: 1.8;
-            max-height: 60vh;
-            overflow-y: auto;
+        /* Loading */
+        .loading-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #3a3a5a;
+            border-top-color: #d4af37;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Sync indicator */
+        .sync-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 15px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: #7dd3b8;
+            display: none;
+        }
+
+        .sync-status.syncing {
+            display: block;
+            color: #d4af37;
         }
 
         /* Scrollbar */
@@ -476,60 +563,82 @@
             .action-bar { flex-direction: column; }
             header h1 { font-size: 1.8rem; }
         }
+
+        /* Hidden */
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Bible Research Library</h1>
-            <p>Your personal encyclopedia of biblical people, events, places, and concepts</p>
-            <div class="stats">
-                <div class="stat">
-                    <div class="stat-num" id="stat-total">0</div>
-                    <div class="stat-label">Entries</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num" id="stat-people">0</div>
-                    <div class="stat-label">People</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num" id="stat-events">0</div>
-                    <div class="stat-label">Events</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-num" id="stat-places">0</div>
-                    <div class="stat-label">Places</div>
-                </div>
-            </div>
-        </header>
-
-        <div class="action-bar">
-            <div class="search-box">
-                <input type="text" id="search-input" placeholder="Search your library..." oninput="renderEntries()">
-            </div>
-            <select class="filter-select" id="filter-type" onchange="renderEntries()">
-                <option value="all">All Types</option>
-                <option value="person">People</option>
-                <option value="event">Events</option>
-                <option value="place">Places</option>
-                <option value="concept">Concepts</option>
-            </select>
-            <button onclick="openAddModal()">+ Add Entry</button>
+    <!-- Login Screen -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-box">
+            <h1>Bible Research</h1>
+            <p>Enter password to access your library</p>
+            <div class="login-error" id="login-error">Incorrect password</div>
+            <input type="password" id="password-input" placeholder="Password" autofocus>
+            <button onclick="login()" style="width: 100%;">Enter</button>
         </div>
+    </div>
 
-        <div class="entries-grid" id="entries-list">
-            <!-- Entries render here -->
-        </div>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen hidden">
+        <div class="spinner"></div>
+        <p style="color: #a0a0b0;">Loading your library...</p>
+    </div>
 
-        <div class="export-section">
-            <div>
-                <span style="color: #6a6a7a;">Export your research to share or backup:</span>
+    <!-- Main App -->
+    <div id="main-app" class="hidden">
+        <div class="container">
+            <header>
+                <h1>Bible Research Library</h1>
+                <p>Your personal encyclopedia of biblical people, events, places, and concepts</p>
+                <div class="stats">
+                    <div class="stat">
+                        <div class="stat-num" id="stat-total">0</div>
+                        <div class="stat-label">Entries</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-num" id="stat-people">0</div>
+                        <div class="stat-label">People</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-num" id="stat-events">0</div>
+                        <div class="stat-label">Events</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-num" id="stat-places">0</div>
+                        <div class="stat-label">Places</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="action-bar">
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Search your library..." oninput="renderEntries()">
+                </div>
+                <select class="filter-select" id="filter-type" onchange="renderEntries()">
+                    <option value="all">All Types</option>
+                    <option value="person">People</option>
+                    <option value="event">Events</option>
+                    <option value="place">Places</option>
+                    <option value="concept">Concepts</option>
+                </select>
+                <button onclick="openAddModal()">+ Add Entry</button>
             </div>
-            <div class="export-buttons">
-                <button onclick="exportJSON()" class="btn-secondary btn-small">Export JSON</button>
-                <button onclick="exportMarkdown()" class="btn-secondary btn-small">Export Markdown</button>
-                <button onclick="document.getElementById('import-file').click()" class="btn-secondary btn-small">Import JSON</button>
-                <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+
+            <div class="entries-grid" id="entries-list">
+                <!-- Entries render here -->
+            </div>
+
+            <div class="export-section">
+                <div>
+                    <span style="color: #6a6a7a;">Export your research to share or backup:</span>
+                </div>
+                <div class="export-buttons">
+                    <button onclick="exportJSON()" class="btn-secondary btn-small">Export JSON</button>
+                    <button onclick="exportMarkdown()" class="btn-secondary btn-small">Export Markdown</button>
+                    <button onclick="logout()" class="btn-secondary btn-small">Logout</button>
+                </div>
             </div>
         </div>
     </div>
@@ -582,12 +691,94 @@
         </div>
     </div>
 
+    <div class="sync-status" id="sync-status">Syncing...</div>
     <div class="notification" id="notification"></div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
     <script>
-        // Data
-        let entries = JSON.parse(localStorage.getItem('bibleLibrary') || '[]');
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBUocJqx5JLS6-6SCmWiRuETykD4pEg8Ws",
+            authDomain: "bible-research-ca784.firebaseapp.com",
+            projectId: "bible-research-ca784",
+            storageBucket: "bible-research-ca784.firebasestorage.app",
+            messagingSenderId: "354438950644",
+            appId: "1:354438950644:web:e2066bc4fde7c8e59078a1"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // App State
+        const APP_PASSWORD = 'bible123';
+        let entries = [];
         let editingId = null;
+        let isLoggedIn = false;
+
+        // Check if already logged in
+        if (sessionStorage.getItem('bibleResearchAuth') === 'true') {
+            showLoading();
+            loadEntries();
+        }
+
+        // Login
+        function login() {
+            const password = document.getElementById('password-input').value;
+            if (password === APP_PASSWORD) {
+                sessionStorage.setItem('bibleResearchAuth', 'true');
+                showLoading();
+                loadEntries();
+            } else {
+                document.getElementById('login-error').style.display = 'block';
+                document.getElementById('password-input').value = '';
+                document.getElementById('password-input').focus();
+            }
+        }
+
+        // Enter key for login
+        document.getElementById('password-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') login();
+        });
+
+        // Logout
+        function logout() {
+            sessionStorage.removeItem('bibleResearchAuth');
+            location.reload();
+        }
+
+        // Show loading screen
+        function showLoading() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('loading-screen').classList.remove('hidden');
+        }
+
+        // Show main app
+        function showApp() {
+            document.getElementById('loading-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            isLoggedIn = true;
+        }
+
+        // Load entries from Firestore
+        async function loadEntries() {
+            try {
+                const snapshot = await db.collection('entries').orderBy('created', 'desc').get();
+                entries = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                showApp();
+                renderEntries();
+            } catch (error) {
+                console.error('Error loading entries:', error);
+                showNotification('Error loading entries. Check console.', true);
+                showApp();
+            }
+        }
 
         // Render entries
         function renderEntries() {
@@ -601,7 +792,7 @@
                 const matchesSearch = !search ||
                     e.name.toLowerCase().includes(search) ||
                     e.content.toLowerCase().includes(search) ||
-                    e.tags.some(t => t.toLowerCase().includes(search)) ||
+                    (e.tags && e.tags.some(t => t.toLowerCase().includes(search))) ||
                     (e.references && e.references.toLowerCase().includes(search));
                 return matchesType && matchesSearch;
             });
@@ -625,7 +816,7 @@
 
             container.innerHTML = filtered.map(entry => `
                 <div class="entry-card" id="card-${entry.id}">
-                    <div class="entry-card-header" onclick="toggleCard(${entry.id})">
+                    <div class="entry-card-header" onclick="toggleCard('${entry.id}')">
                         <div>
                             <div class="entry-title">${escapeHtml(entry.name)}</div>
                             <div class="entry-meta">
@@ -637,15 +828,15 @@
                     </div>
                     <div class="entry-card-body">
                         <div class="entry-content">${escapeHtml(entry.content)}</div>
-                        ${entry.tags.length ? `
+                        ${entry.tags && entry.tags.length ? `
                             <div class="entry-tags">
                                 ${entry.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}
                             </div>
                         ` : ''}
                         <div class="entry-actions">
-                            <button onclick="editEntry(${entry.id})" class="btn-secondary btn-small">Edit</button>
-                            <button onclick="deleteEntry(${entry.id})" class="btn-danger btn-small">Delete</button>
-                            <button onclick="copyEntry(${entry.id})" class="btn-secondary btn-small">Copy Text</button>
+                            <button onclick="editEntry('${entry.id}')" class="btn-secondary btn-small">Edit</button>
+                            <button onclick="deleteEntry('${entry.id}')" class="btn-danger btn-small">Delete</button>
+                            <button onclick="copyEntry('${entry.id}')" class="btn-secondary btn-small">Copy Text</button>
                         </div>
                     </div>
                 </div>
@@ -677,33 +868,43 @@
             editingId = null;
         }
 
-        // Save entry
-        function saveEntry(e) {
+        // Save entry to Firestore
+        async function saveEntry(e) {
             e.preventDefault();
+            showSyncing(true);
 
-            const entry = {
-                id: editingId || Date.now(),
+            const entryData = {
                 name: document.getElementById('entry-name').value.trim(),
                 type: document.getElementById('entry-type').value,
                 content: document.getElementById('entry-content').value.trim(),
                 tags: document.getElementById('entry-tags').value.split(',').map(t => t.trim()).filter(t => t),
                 references: document.getElementById('entry-refs').value.trim(),
-                created: editingId ? entries.find(e => e.id === editingId)?.created : new Date().toISOString(),
                 updated: new Date().toISOString()
             };
 
-            if (editingId) {
-                const idx = entries.findIndex(e => e.id === editingId);
-                entries[idx] = entry;
-                showNotification('Entry updated!');
-            } else {
-                entries.unshift(entry);
-                showNotification('Entry saved!');
+            try {
+                if (editingId) {
+                    // Update existing
+                    await db.collection('entries').doc(editingId).update(entryData);
+                    const idx = entries.findIndex(e => e.id === editingId);
+                    entries[idx] = { id: editingId, ...entries[idx], ...entryData };
+                    showNotification('Entry updated!');
+                } else {
+                    // Create new
+                    entryData.created = new Date().toISOString();
+                    const docRef = await db.collection('entries').add(entryData);
+                    entries.unshift({ id: docRef.id, ...entryData });
+                    showNotification('Entry saved!');
+                }
+
+                closeModal();
+                renderEntries();
+            } catch (error) {
+                console.error('Error saving entry:', error);
+                showNotification('Error saving entry. Try again.', true);
             }
 
-            localStorage.setItem('bibleLibrary', JSON.stringify(entries));
-            closeModal();
-            renderEntries();
+            showSyncing(false);
         }
 
         // Edit entry
@@ -716,18 +917,26 @@
             document.getElementById('entry-name').value = entry.name;
             document.getElementById('entry-type').value = entry.type;
             document.getElementById('entry-content').value = entry.content;
-            document.getElementById('entry-tags').value = entry.tags.join(', ');
+            document.getElementById('entry-tags').value = (entry.tags || []).join(', ');
             document.getElementById('entry-refs').value = entry.references || '';
             document.getElementById('add-modal').classList.add('show');
         }
 
-        // Delete entry
-        function deleteEntry(id) {
+        // Delete entry from Firestore
+        async function deleteEntry(id) {
             if (!confirm('Delete this entry? This cannot be undone.')) return;
-            entries = entries.filter(e => e.id !== id);
-            localStorage.setItem('bibleLibrary', JSON.stringify(entries));
-            renderEntries();
-            showNotification('Entry deleted');
+
+            showSyncing(true);
+            try {
+                await db.collection('entries').doc(id).delete();
+                entries = entries.filter(e => e.id !== id);
+                renderEntries();
+                showNotification('Entry deleted');
+            } catch (error) {
+                console.error('Error deleting entry:', error);
+                showNotification('Error deleting entry. Try again.', true);
+            }
+            showSyncing(false);
         }
 
         // Copy entry text
@@ -759,7 +968,6 @@
                 return;
             }
 
-            // Group by type
             const grouped = {
                 person: entries.filter(e => e.type === 'person'),
                 event: entries.filter(e => e.type === 'event'),
@@ -779,40 +987,13 @@
                 for (const entry of items) {
                     md += `### ${entry.name}\n\n`;
                     if (entry.references) md += `**Scripture:** ${entry.references}\n\n`;
-                    if (entry.tags.length) md += `**Tags:** ${entry.tags.join(', ')}\n\n`;
+                    if (entry.tags && entry.tags.length) md += `**Tags:** ${entry.tags.join(', ')}\n\n`;
                     md += `${entry.content}\n\n---\n\n`;
                 }
             }
 
             downloadFile(md, `bible-library-${new Date().toISOString().split('T')[0]}.md`, 'text/markdown');
             showNotification('Exported as Markdown');
-        }
-
-        // Import JSON
-        function importJSON(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                try {
-                    const imported = JSON.parse(event.target.result);
-                    if (!Array.isArray(imported)) throw new Error('Invalid format');
-
-                    // Merge with existing, avoiding duplicates by ID
-                    const existingIds = new Set(entries.map(e => e.id));
-                    const newEntries = imported.filter(e => !existingIds.has(e.id));
-                    entries = [...newEntries, ...entries];
-
-                    localStorage.setItem('bibleLibrary', JSON.stringify(entries));
-                    renderEntries();
-                    showNotification(`Imported ${newEntries.length} new entries!`);
-                } catch (err) {
-                    showNotification('Invalid JSON file', true);
-                }
-            };
-            reader.readAsText(file);
-            e.target.value = '';
         }
 
         // Download helper
@@ -833,6 +1014,16 @@
             return div.innerHTML;
         }
 
+        // Show syncing indicator
+        function showSyncing(show) {
+            const el = document.getElementById('sync-status');
+            if (show) {
+                el.classList.add('syncing');
+            } else {
+                el.classList.remove('syncing');
+            }
+        }
+
         // Notification
         function showNotification(message, isError = false) {
             const notif = document.getElementById('notification');
@@ -850,9 +1041,6 @@
         document.getElementById('add-modal').addEventListener('click', (e) => {
             if (e.target.classList.contains('modal-overlay')) closeModal();
         });
-
-        // Initial render
-        renderEntries();
     </script>
 </body>
 </html>
