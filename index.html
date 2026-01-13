@@ -766,7 +766,7 @@
         // Load entries from Firestore
         async function loadEntries() {
             try {
-                const snapshot = await db.collection('entries').orderBy('created', 'desc').get();
+                const snapshot = await db.collection('entries').orderBy('name').get();
                 entries = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
@@ -888,12 +888,14 @@
                     await db.collection('entries').doc(editingId).update(entryData);
                     const idx = entries.findIndex(e => e.id === editingId);
                     entries[idx] = { id: editingId, ...entries[idx], ...entryData };
+                    entries.sort((a, b) => a.name.localeCompare(b.name));
                     showNotification('Entry updated!');
                 } else {
                     // Create new
                     entryData.created = new Date().toISOString();
                     const docRef = await db.collection('entries').add(entryData);
-                    entries.unshift({ id: docRef.id, ...entryData });
+                    entries.push({ id: docRef.id, ...entryData });
+                    entries.sort((a, b) => a.name.localeCompare(b.name));
                     showNotification('Entry saved!');
                 }
 
